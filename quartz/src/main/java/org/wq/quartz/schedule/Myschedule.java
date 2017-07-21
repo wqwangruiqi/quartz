@@ -6,13 +6,19 @@ import java.util.Date;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Matcher;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.KeyMatcher;
 import org.wq.quartz.job.MyJob;
+import org.wq.quartz.listener.MyJobListener;
+import org.wq.quartz.listener.MyScheduleListener;
+import org.wq.quartz.listener.MyTriggerListener;
 
 public class Myschedule {
 
@@ -49,8 +55,22 @@ public class Myschedule {
 			
 			Scheduler scheduler = createScheduler();
 			scheduler.scheduleJob(jobDetail, trigger2);
-			//启动job
+			
+			//添加一个job监听器
+			scheduler.getListenerManager().addJobListener(new MyJobListener());
+			//添加一个trigger监听器
+			scheduler.getListenerManager().addTriggerListener(new MyTriggerListener());
+			//添加一个schedule监听器
+			scheduler.getListenerManager().addSchedulerListener(new MyScheduleListener());
+			
+			//启动调度器
 			scheduler.start();
+			Thread.sleep(10000);
+			System.out.println("执行scheduler.clear()");
+			scheduler.clear();
+			Thread.sleep(3000);
+			System.out.println("执行scheduler.shutdown()");
+			scheduler.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
